@@ -146,17 +146,17 @@ def d8_specific_catchment(dem, cell):
 # Sidebar: material properties (shared by both tabs)
 # ----------------------------------------------------------------------------
 st.sidebar.header("Material")
-phi = st.sidebar.slider("Friction angle φ (°)", 15.0, 45.0, 30.0, 0.5)
-c_kpa = st.sidebar.slider("Effective cohesion c′ (kPa)", 0.0, 20.0, 0.0, 0.5,
+phi = st.sidebar.slider("Friction angle φ (°)", 5.0, 60.0, 30.0, 0.5)
+c_kpa = st.sidebar.slider("Effective cohesion c′ (kPa)", 0.0, 100.0, 0.0, 0.5,
                           help="0 = dry sand case from the slides. Root cohesion is often 1–10 kPa.")
-rho_dry = st.sidebar.number_input("Dry bulk density ρ_dry (kg/m³)", 1000, 2400, 1600, 10)
-rho_sat = st.sidebar.number_input("Saturated bulk density ρ_sat (kg/m³)", 1200, 2600, 2000, 10)
+rho_dry = st.sidebar.number_input("Dry bulk density ρ_dry (kg/m³)", 300, 3000, 1600, 10)
+rho_sat = st.sidebar.number_input("Saturated bulk density ρ_sat (kg/m³)", 800, 3200, 2000, 10)
 rho_w = 1000.0
 if rho_sat < rho_dry:
     st.sidebar.warning("ρ_sat should be larger than ρ_dry.")
 
 st.sidebar.header("Failure plane & water")
-z_s = st.sidebar.slider("Depth to failure plane z_s (m, vertical)", 0.2, 5.0, 1.5, 0.1)
+z_s = st.sidebar.slider("Depth to failure plane z_s (m, vertical)", 0.1, 50.0, 1.5, 0.1)
 
 st.title("Infinite-slope stability playground")
 st.caption("τ = ρ_b g z_s sinθ cosθ   ·   SS = c′ + (σ_N − u) tanφ   ·   FoS = SS / τ")
@@ -169,7 +169,7 @@ tab1, tab2 = st.tabs(["Single slope", "FoS map"])
 with tab1:
     col_in, col_out = st.columns([1, 2])
     with col_in:
-        theta = st.slider("Slope angle θ (°)", 1.0, 60.0, 25.0, 0.5)
+        theta = st.slider("Slope angle θ (°)", 0.5, 89.0, 25.0, 0.5)
         m_single = st.slider("Saturated fraction m = h / z_s", 0.0, 1.0, 0.0, 0.05, key="m1")
         r = infinite_slope(np.radians(theta), z_s, phi, c_kpa, m_single, rho_sat, rho_dry, rho_w)
         fos = float(r["fos"])
@@ -193,7 +193,7 @@ with tab1:
                     f"tanθ_c = (1 − m ρ_w/ρ_b) tanφ")
 
     with col_out:
-        th = np.linspace(1, 60, 400)
+        th = np.linspace(0.5, 89, 600)
         fig, ax = plt.subplots(figsize=(7, 4.2))
         for mm, ls in [(0.0, "-"), (0.5, "--"), (1.0, ":")]:
             f = infinite_slope(np.radians(th), z_s, phi, c_kpa, mm, rho_sat, rho_dry, rho_w)["fos"]
@@ -203,7 +203,7 @@ with tab1:
         ax.axhline(1, color="k", lw=0.8)
         ax.axvline(theta, color="#D85A30", lw=0.8, ls="--")
         ax.plot(theta, fos, "o", color="#D85A30")
-        ax.set_ylim(0, 4)
+        ax.set_ylim(0, max(4, min(fos * 1.3, 20)) if np.isfinite(fos) else 4)
         ax.set_xlabel("Slope angle θ (°)")
         ax.set_ylabel("FoS")
         ax.set_title("FoS vs slope angle")
@@ -252,11 +252,11 @@ with tab2:
         if water_mode == "Uniform m":
             m_map = st.slider("Saturated fraction m", 0.0, 1.0, 0.0, 0.05, key="m2")
         else:
-            log_rt = st.slider("log₁₀ (R / T)  — wetter →", -5.0, -1.0, -3.5, 0.1,
+            log_rt = st.slider("log₁₀ (R / T)  — wetter →", -6.0, 0.0, -3.5, 0.1,
                                help="R = recharge (m/day), T = transmissivity (m²/day). "
                                     "m = min(1, (R/T) · a / sinθ), a = specific catchment area.")
             st.caption(f"R/T = {10**log_rt:.1e} m⁻¹")
-        fos_max = st.slider("Colour scale max FoS", 1.5, 5.0, 3.0, 0.5)
+        fos_max = st.slider("Colour scale max FoS", 2.5, 10.0, 3.0, 0.5)
 
     slope = slope_deg(dem, cell)
     theta_map = np.radians(slope)
