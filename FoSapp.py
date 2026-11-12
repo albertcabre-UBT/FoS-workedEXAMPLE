@@ -169,7 +169,7 @@ tab1, tab2 = st.tabs(["Single slope", "FoS map"])
 with tab1:
     col_in, col_out = st.columns([1, 2])
     with col_in:
-        theta = st.slider("Slope angle θ (°)", 0.5, 89.0, 25.0, 0.5)
+        theta = st.slider("Slope angle θ (°)", 0.5, 45.0, 25.0, 0.5)
         m_single = st.slider("Saturated fraction m = h / z_s", 0.0, 1.0, 0.0, 0.05, key="m1")
         r = infinite_slope(np.radians(theta), z_s, phi, c_kpa, m_single, rho_sat, rho_dry, rho_w)
         fos = float(r["fos"])
@@ -193,7 +193,7 @@ with tab1:
                     f"tanθ_c = (1 − m ρ_w/ρ_b) tanφ")
 
     with col_out:
-        th = np.linspace(0.5, 89, 600)
+        th = np.linspace(0.5, 45, 400)
         fig, ax = plt.subplots(figsize=(7, 4.2))
         for mm, ls in [(0.0, "-"), (0.5, "--"), (1.0, ":")]:
             f = infinite_slope(np.radians(th), z_s, phi, c_kpa, mm, rho_sat, rho_dry, rho_w)["fos"]
