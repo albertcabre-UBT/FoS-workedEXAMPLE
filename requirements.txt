@@ -1,4 +1,5 @@
 streamlit>=1.30
 numpy
 matplotlib
-
+# optional, for GeoTIFF upload:
+# rasterio
