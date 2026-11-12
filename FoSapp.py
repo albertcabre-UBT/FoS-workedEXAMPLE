@@ -150,10 +150,16 @@ phi = st.sidebar.slider("Friction angle φ (°)", 5.0, 60.0, 30.0, 0.5)
 c_kpa = st.sidebar.slider("Effective cohesion c′ (kPa)", 0.0, 100.0, 0.0, 0.5,
                           help="0 = dry sand case from the slides. Root cohesion is often 1–10 kPa.")
 rho_dry = st.sidebar.number_input("Dry bulk density ρ_dry (kg/m³)", 300, 3000, 1600, 10)
-rho_sat = st.sidebar.number_input("Saturated bulk density ρ_sat (kg/m³)", 800, 3200, 2000, 10)
+porosity = st.sidebar.slider("Porosity n", 0.05, 0.80, 0.40, 0.01,
+                             help="Fraction of pore space. Sand ~0.3–0.45, silt/clay ~0.4–0.6, peat >0.8.")
 rho_w = 1000.0
-if rho_sat < rho_dry:
-    st.sidebar.warning("ρ_sat should be larger than ρ_dry.")
+rho_sat = rho_dry + porosity * rho_w
+rho_grain = rho_dry / (1 - porosity)
+st.sidebar.markdown(f"→ ρ_sat = ρ_dry + n·ρ_w = **{rho_sat:.0f} kg/m³**")
+st.sidebar.caption(f"Implied grain density ρ_s = ρ_dry/(1−n) = {rho_grain:.0f} kg/m³ (quartz ≈ 2650)")
+if not 2300 <= rho_grain <= 3100:
+    st.sidebar.warning("That ρ_dry / n combination implies an unusual grain density. "
+                       "Typical minerals give ρ_s ≈ 2600–2800 kg/m³ (lower for organic soils).")
 
 st.sidebar.header("Failure plane & water")
 z_s = st.sidebar.slider("Depth to failure plane z_s (m, vertical)", 0.1, 50.0, 1.5, 0.1)
